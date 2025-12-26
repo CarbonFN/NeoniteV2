@@ -2,3 +2,5 @@ node_modules/
 profile/
 NodeMonRun.cmd
 cache/
+/dist
+/bin

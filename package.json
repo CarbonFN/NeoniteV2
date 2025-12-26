@@ -3,8 +3,10 @@
   "version": "1.6.5",
   "description": "A Fortnite Private Server",
   "main": "app.js",
+  "bin": "app.js",
   "scripts": {
-    "start": "NODE_ENV=production node app.js"
+    "start": "NODE_ENV=production node app.js",
+    "build": "node build.js"
   },
   "repository": {
     "type": "git",
@@ -23,5 +25,8 @@
     "path": "^0.12.7",
     "sails": "^1.5.14",
     "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@radically-straightforward/package": "^2.0.3"
   }
 }

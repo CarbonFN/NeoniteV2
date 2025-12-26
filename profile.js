@@ -1,6 +1,9 @@
 const fs = require("fs");
 const path = require("path");
 
+const isPackaged = __dirname.includes('caxa');
+const baseDir = isPackaged ? process.cwd() : __dirname;
+
 // @author armisto#2174
 module.exports = {
     /**
@@ -150,26 +153,34 @@ module.exports = {
 
     readProfile(accountId, profileId) {
         try {
-            return JSON.parse(fs.readFileSync(path.join(__dirname, `/profile/${accountId}/profiles/profile_${profileId}.json`), "utf8"));
+            return JSON.parse(fs.readFileSync(path.join(baseDir, `profile/${accountId}/profiles/profile_${profileId}.json`), "utf8"));
         } catch (e) {
             return null;
         }
     },
+    
     readProfileTemplate(profileId) {
         try {
-            return JSON.parse(fs.readFileSync(path.join(__dirname, `/profile_template/profiles/profile_${profileId}.json`), "utf8"));
+            //TODO: Possibly move this to external aswell, not sure yet(in caxa)
+            return JSON.parse(fs.readFileSync(path.join(__dirname, `profile_template/profiles/profile_${profileId}.json`), "utf8"));
         } catch (e) {
             return null;
         }
     },
 
     saveProfile(accountId, profileId, data) {
-        fs.writeFileSync(path.join(__dirname, `/profile/${accountId}/profiles/profile_${profileId}.json`), JSON.stringify(data, null, 2));
+        const profilePath = path.join(baseDir, `profile/${accountId}/profiles`);
+        
+        if (!fs.existsSync(profilePath)) {
+            fs.mkdirSync(profilePath, { recursive: true });
+        }
+        
+        fs.writeFileSync(path.join(profilePath, `profile_${profileId}.json`), JSON.stringify(data, null, 2));
     },
 
     readLockerProfile(accountId, version) {
         try {
-            return JSON.parse(fs.readFileSync(path.join(__dirname, `/profile/${accountId}/profiles/lockerv${version}.json`), "utf8"));
+            return JSON.parse(fs.readFileSync(path.join(baseDir, `profile/${accountId}/profiles/lockerv${version}.json`), "utf8"));
         } catch (e) {
             return null;
         }
@@ -177,13 +188,20 @@ module.exports = {
 
     readLockerTemplate(version) {
         try {
-            return JSON.parse(fs.readFileSync(path.join(__dirname, `/profile_template/profiles/lockerv${version}.json`), "utf8"));
+            //TODO: Possibly move this to external aswell, not sure yet(in caxa)
+            return JSON.parse(fs.readFileSync(path.join(__dirname, `profile_template/profiles/lockerv${version}.json`), "utf8"));
         } catch (e) {
             return null;
         }
     },
 
     saveLocker(accountId, version, data) {
-        fs.writeFileSync(path.join(__dirname, `/profile/${accountId}/profiles/lockerv${version}.json`), JSON.stringify(data, null, 2));
+        const profilePath = path.join(baseDir, `profile/${accountId}/profiles`);
+        
+        if (!fs.existsSync(profilePath)) {
+            fs.mkdirSync(profilePath, { recursive: true });
+        }
+        
+        fs.writeFileSync(path.join(profilePath, `lockerv${version}.json`), JSON.stringify(data, null, 2));
     },
 };
