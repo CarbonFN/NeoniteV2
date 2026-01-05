@@ -1,20 +1,23 @@
 const sails = require("sails");
-const NeoLog = require("./structs/NeoLog")
+const NeoLog = require("./structs/NeoLog");
+const { extractEmbeddedFiles } = require("./structs/Extractor");
 const { default: axios } = require("axios");
 const fs = require("fs");
 const path = require("path");
 const ini = require("ini");
+const { externalDir, bundledDir, isPackaged } = require("./structs/paths");
 
-const isPackaged = __dirname.includes('caxa'); //check if running in packaged exe
-const baseDir = isPackaged ? process.cwd() : __dirname;
+//etract embedded files on first run, func checks if its needed
+extractEmbeddedFiles();
+
 const sailsAppPath = isPackaged ? __dirname : process.cwd();
 
-const configPath = path.join(baseDir, "config.ini");
-const keychainPath = path.join(baseDir, "responses", "keychain.json");
+const configPath = path.join(externalDir, "config.ini");
+const keychainPath = path.join(externalDir, "responses", "keychain.json");
 
 const config = ini.parse(fs.readFileSync(configPath, "utf-8"));
 
-const responsesDir = path.join(baseDir, "responses");
+const responsesDir = path.join(externalDir, "responses");
 if (!fs.existsSync(responsesDir)) {
     fs.mkdirSync(responsesDir, { recursive: true });
 }

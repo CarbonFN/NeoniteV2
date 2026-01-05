@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const isPackaged = __dirname.includes('caxa');
-const baseDir = isPackaged ? process.cwd() : __dirname;
+const { externalDir, bundledDir } = require("./structs/paths");
+
 
 // @author armisto#2174
 module.exports = {
@@ -153,7 +153,7 @@ module.exports = {
 
     readProfile(accountId, profileId) {
         try {
-            return JSON.parse(fs.readFileSync(path.join(baseDir, `profile/${accountId}/profiles/profile_${profileId}.json`), "utf8"));
+            return JSON.parse(fs.readFileSync(path.join(externalDir, `profile/${accountId}/profiles/profile_${profileId}.json`), "utf8"));
         } catch (e) {
             return null;
         }
@@ -169,7 +169,7 @@ module.exports = {
     },
 
     saveProfile(accountId, profileId, data) {
-        const profilePath = path.join(baseDir, `profile/${accountId}/profiles`);
+        const profilePath = path.join(externalDir, `profile/${accountId}/profiles`);
         
         if (!fs.existsSync(profilePath)) {
             fs.mkdirSync(profilePath, { recursive: true });
@@ -180,7 +180,7 @@ module.exports = {
 
     readLockerProfile(accountId, version) {
         try {
-            return JSON.parse(fs.readFileSync(path.join(baseDir, `profile/${accountId}/profiles/lockerv${version}.json`), "utf8"));
+            return JSON.parse(fs.readFileSync(path.join(externalDir, `profile/${accountId}/profiles/lockerv${version}.json`), "utf8"));
         } catch (e) {
             return null;
         }
@@ -196,7 +196,7 @@ module.exports = {
     },
 
     saveLocker(accountId, version, data) {
-        const profilePath = path.join(baseDir, `profile/${accountId}/profiles`);
+        const profilePath = path.join(externalDir, `profile/${accountId}/profiles`);
         
         if (!fs.existsSync(profilePath)) {
             fs.mkdirSync(profilePath, { recursive: true });

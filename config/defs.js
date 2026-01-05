@@ -6,8 +6,7 @@ const account = {
     accountId: ""
 };
 
-const isPackaged = __dirname.includes('caxa');
-const responsesPath = isPackaged ? path.join(process.cwd(), 'responses') : path.join(__dirname, '..', 'responses');
+const { externalDir, bundledDir } = require("../structs/paths");
 
 const MPLockerLoadout = (accountId, athenprofile) => {
     const characterloadout = athenprofile.items["NEONITECHARACTER"]
@@ -544,21 +543,19 @@ const CH1Fix = (accountId, athenprofile) => {
 };
 
 function loadJSON(filename) {
-    const externalPath = path.join(process.cwd(), filename);
+    const normalizedFilename = filename.replace(/^\.\.\/|^\.\//g, '');
+    
+    const externalPath = path.join(externalDir, normalizedFilename);
     if (fs.existsSync(externalPath)) {
         return JSON.parse(fs.readFileSync(externalPath, 'utf-8'));
     }
     
-    const bundledPath = isPackaged 
-        ? path.join(__dirname, '..', filename)
-        : path.join(__dirname, '..', filename);
-    
+    const bundledPath = path.join(bundledDir, normalizedFilename);
     if (fs.existsSync(bundledPath)) {
         return JSON.parse(fs.readFileSync(bundledPath, 'utf-8'));
     }
     
-    const fallbackPath = path.join(responsesPath, filename);
-    return JSON.parse(fs.readFileSync(fallbackPath, 'utf-8'));
+    throw new Error(`File not found: ${normalizedFilename}\nTried:\n  - External: ${externalPath}\n  - Bundled: ${bundledPath}`);
 }
 
 const VersionFilter = [

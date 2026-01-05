@@ -11,7 +11,8 @@ Array.prototype.insert = function (index, item) {
 	this.splice(index, 0, item);
 };
 const NeoLog = require("../../structs/NeoLog");
-var config = ini.parse(fs.readFileSync(path.join(__dirname, '../../config.ini'), 'utf-8'));
+const { externalDir } = require("../../structs/paths");
+const config = ini.parse(fs.readFileSync(path.join(externalDir, "config.ini"), "utf-8"));
 const rewardNodeArray = []
 let keysUsed = 0
 let keysGranted = 14

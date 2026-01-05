@@ -4,7 +4,8 @@ const fs = require('fs')
 const jsonwebtoken = require('jsonwebtoken');
 const ini = require('ini')
 const { getVersionInfo, loadJSON, VersionFilter } = require("../../config/defs");
-const config = ini.parse(fs.readFileSync(path.join(__dirname, '../../config.ini'), 'utf-8'));
+const { externalDir, bundledDir } = require("../../structs/paths");
+const config = ini.parse(fs.readFileSync(path.join(externalDir, "config.ini"), "utf-8"));
 let requested = false
 const fortnitegame = loadJSON("../responses/fortnitegame.json")
 

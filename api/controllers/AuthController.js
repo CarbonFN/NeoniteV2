@@ -5,7 +5,8 @@ const jsonwebtoken = require('jsonwebtoken');
 const ini = require('ini')
 const fs = require('fs')
 const path = require("path");
-const config = ini.parse(fs.readFileSync(path.join(__dirname, '../../config.ini'), 'utf-8'));
+const { externalDir } = require("../../structs/paths");
+const config = ini.parse(fs.readFileSync(path.join(externalDir, "config.ini"), "utf-8"));
 const {account} = require("../../config/defs")
 
 

@@ -2,23 +2,15 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-function copyRecursive(src, dest) {
-    if (!fs.existsSync(src)) return;
-    
-    if (!fs.existsSync(dest)) {
-        fs.mkdirSync(dest, { recursive: true });
-    }
-
-    const entries = fs.readdirSync(src, { withFileTypes: true });
-
+function bundleFolderToJson(folderPath, target) {
+    const entries = fs.readdirSync(folderPath, { withFileTypes: true });
     for (const entry of entries) {
-        const srcPath = path.join(src, entry.name);
-        const destPath = path.join(dest, entry.name);
-
+        const fullPath = path.join(folderPath, entry.name);
         if (entry.isDirectory()) {
-            copyRecursive(srcPath, destPath);
+            target[entry.name] = {};
+            bundleFolderToJson(fullPath, target[entry.name]);
         } else {
-            fs.copyFileSync(srcPath, destPath);
+            target[entry.name] = fs.readFileSync(fullPath).toString('base64');
         }
     }
 }
@@ -28,28 +20,38 @@ if (fs.existsSync('bin')) {
 }
 fs.mkdirSync('bin');
 
-console.log('Building executable...');
-execSync('caxa --input . --output bin/neonite.exe --exclude "bin" --exclude "build.js" --exclude "*.md" --exclude ".gitignore" --exclude "responses" --exclude "profile" -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/app.js"', { stdio: 'inherit' });
+//bundled files get included with the exe and get extracted on first run
+const foldersToEmbed = ['responses'];
+const filesToEmbed = ['config.ini'];
 
-console.log('Copying external files and folders...');
+const excludeList = ['bin', 'build.js', '*.md', '.gitignore', 'profile', ...foldersToEmbed]; //, ...filesToEmbed //filestoembed will break until FortniteGameController will get updated to use the path system
+const excludeArgs = excludeList.map(e => `--exclude "${e}"`).join(' ');
 
-//TODO: Add profile template folder and make caxa command dynamic based on the folders listed below
-const foldersToInclude = [
-    'responses',
-    'profile'
-];
+console.log('Bundling external files...');
+const bundle = { folders: {}, files: {} };
 
-foldersToInclude.forEach(folder => {
+foldersToEmbed.forEach(folder => {
     if (fs.existsSync(folder)) {
-        copyRecursive(folder, path.join('bin', folder));
-        console.log(`Copied ${folder}/`);
+        bundle.folders[folder] = {};
+        bundleFolderToJson(folder, bundle.folders[folder]);
+        console.log(`Bundled ${folder}/`);
     }
 });
 
-if (fs.existsSync('config.ini')) {
-    fs.copyFileSync('config.ini', path.join('bin', 'config.ini'));
-    console.log('Copied config.ini');
-}
+filesToEmbed.forEach(file => {
+    if (fs.existsSync(file)) {
+        bundle.files[file] = fs.readFileSync(file).toString('base64');
+        console.log(`Bundled ${file}`);
+    }
+});
+
+//not my prefered solution but seems to work more stable
+const embeddedContent = `module.exports = ${JSON.stringify(bundle)};`;
+fs.writeFileSync('structs/embedded-data.js', embeddedContent);
+
+console.log('Building executable...');
+execSync(`caxa --input . --output bin/neonite.exe ${excludeArgs} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/app.js"`, { stdio: 'inherit' });
+
+fs.unlinkSync('structs/embedded-data.js');
 
 console.log('Build complete!');
-console.log('Run: cd bin && neonite.exe');
